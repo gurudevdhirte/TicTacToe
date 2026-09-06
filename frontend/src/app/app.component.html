@@ -1,0 +1,99 @@
+<div class="page">
+  <header class="header">
+    <div>
+      <h1>Tic Tac Toe</h1>
+      <p>ABB Round 2</p>
+    </div>
+
+    <div class="mode">
+      <label for="mode">Game Mode</label>
+      <select id="mode" [value]="selectedMode" (change)="onModeChange($event)" [disabled]="busy">
+        <option value="TwoPlayer">Two Player</option>
+        <option value="Computer">Play Against Computer</option>
+      </select>
+    </div>
+  </header>
+
+  @if (game) {
+    <main class="content">
+      <section class="game-panel">
+        <div class="status" [class.won]="game.status === 'Won'" [class.draw]="game.status === 'Draw'">
+          {{ statusMessage() }}
+        </div>
+
+        <div class="board" aria-label="Tic Tac Toe board">
+          @for (cell of cells; track cell) {
+            <button
+              class="cell"
+              [class.winning]="isWinningCell(cell)"
+              [disabled]="busy || game.status !== 'InProgress' || game.board[cell] !== null"
+              (click)="play(cell)"
+              [attr.aria-label]="cellLabel(cell)">
+              {{ game.board[cell] ?? '' }}
+            </button>
+          }
+        </div>
+
+        @if (errorMessage) {
+          <div class="error">{{ errorMessage }}</div>
+        }
+
+        <div class="actions">
+          <button class="primary" (click)="resetGame()" [disabled]="busy">
+            Reset Game
+          </button>
+
+          <button
+            (click)="undo()"
+            [disabled]="busy || game.moveHistory.length === 0 || game.status !== 'InProgress'">
+            Undo Last Move
+          </button>
+
+          <button (click)="resetScoreboard()" [disabled]="busy">
+            Reset Scoreboard
+          </button>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="card">
+          <h2>Scoreboard</h2>
+          <div class="score-row">
+            <span>X Wins</span>
+            <strong>{{ game.scoreboard.xWins }}</strong>
+          </div>
+          <div class="score-row">
+            <span>O Wins</span>
+            <strong>{{ game.scoreboard.oWins }}</strong>
+          </div>
+          <div class="score-row">
+            <span>Draws</span>
+            <strong>{{ game.scoreboard.draws }}</strong>
+          </div>
+        </section>
+
+        <section class="card">
+          <h2>Move History</h2>
+
+          @if (game.moveHistory.length === 0) {
+            <p class="muted">No moves yet.</p>
+          } @else {
+            <ol class="history">
+              @for (move of game.moveHistory; track move.moveNumber) {
+                <li>
+                  <strong>{{ move.moveNumber }}.</strong>
+                  <span>{{ move.player }}</span>
+                  <span>{{ cellLabel(move.cell) }}</span>
+                </li>
+              }
+            </ol>
+          }
+        </section>
+      </aside>
+    </main>
+  }
+
+  <footer>
+    Backend is authoritative for game rules, move validation, state and scoreboard.
+  </footer>
+</div>
